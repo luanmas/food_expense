@@ -1,6 +1,8 @@
 package lunch_automate.com.example.app.Entity;
 
 import jakarta.persistence.*;
+import lunch_automate.com.example.app.Dto.OrderRequest;
+import lunch_automate.com.example.app.Dto.OrderResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +21,28 @@ public class Order {
     private String observation;
 
     private BigDecimal price;
+
+    private Boolean delived;
+
+    public OrderResponse toOrderResponse(OrderRequest orderRequest) {
+        var convertPaymentEnum = Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase());
+        var orderResponse = new OrderResponse(orderRequest.customerName(), orderRequest.paymentMethod(), orderRequest.observation(), orderRequest.delivered(), orderRequest.address(), orderRequest.lunchRequestList());
+        return orderResponse;
+    }
+
+//    public Order toOrder(OrderRequest orderRequest) {
+//        var convertPaymentEnum = Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase());
+//        var order = new Order();
+//        order.setCustomerName(orderRequest.customerName());
+//        order.setAddress(orderRequest.address());
+//        order.setObservation(orderRequest.observation());
+//
+//        var (order.getLunch(): lunch) {
+//            var newLunch = new Lunch();
+//
+//        }
+//
+//    }
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Lunch> lunch;
