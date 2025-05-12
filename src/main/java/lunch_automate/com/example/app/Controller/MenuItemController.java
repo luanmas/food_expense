@@ -3,6 +3,7 @@ package lunch_automate.com.example.app.Controller;
 import jakarta.validation.Valid;
 import lunch_automate.com.example.app.Dto.MenuItemRequest;
 import lunch_automate.com.example.app.Dto.MenuItemResponse;
+import lunch_automate.com.example.app.Entity.MenuItem;
 import lunch_automate.com.example.app.Service.MenuItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class MenuItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MenuItemResponse>> getAllOptions() {
+    public ResponseEntity<List<MenuItem>> getAllOptions() {
         return ResponseEntity.ok(menuItemService.findAllMenuItem());
     }
 

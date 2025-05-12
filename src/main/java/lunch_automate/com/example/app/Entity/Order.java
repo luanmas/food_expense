@@ -1,11 +1,14 @@
 package lunch_automate.com.example.app.Entity;
 
 import jakarta.persistence.*;
+import lunch_automate.com.example.app.Dto.LunchRequest;
 import lunch_automate.com.example.app.Dto.OrderRequest;
 import lunch_automate.com.example.app.Dto.OrderResponse;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "tb_order")
@@ -24,35 +27,48 @@ public class Order {
 
     private Boolean delived;
 
+    @Enumerated(EnumType.STRING)
+    private Payment payment;
+
     public OrderResponse toOrderResponse(OrderRequest orderRequest) {
-        var convertPaymentEnum = Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase());
         var orderResponse = new OrderResponse(orderRequest.customerName(), orderRequest.paymentMethod(), orderRequest.observation(), orderRequest.delivered(), orderRequest.address(), orderRequest.lunchRequestList());
         return orderResponse;
     }
 
-//    public Order toOrder(OrderRequest orderRequest) {
-//        var convertPaymentEnum = Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase());
-//        var order = new Order();
-//        order.setCustomerName(orderRequest.customerName());
-//        order.setAddress(orderRequest.address());
-//        order.setObservation(orderRequest.observation());
+//    public OrderResponse toOrderResponse(Order order) {
+//        var listLunchResponse = order.getLunch().stream().map(lunch -> {
+//            var lunchRequest = new LunchRequest();
 //
-//        var (order.getLunch(): lunch) {
-//            var newLunch = new Lunch();
+//        })
 //
-//        }
-//
+//        var orderResponse = new OrderResponse(order.getCustomerName(), order.getPayment().name(), order.getObservation(), order.getDelived(), order.getAddress(), order.getLunch());
 //    }
+
+    public Order toOrder(OrderRequest orderRequest) {
+        var convertPaymentEnum = Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase());
+        var order = new Order();
+        order.setCustomerName(orderRequest.customerName());
+        order.setAddress(orderRequest.address());
+        order.setObservation(orderRequest.observation());
+        order.setPayment(convertPaymentEnum);
+
+        List<Lunch> lunches = orderRequest.lunchRequestList().stream().map(lunchRequest -> {
+            Lunch newLunch = new Lunch();
+            newLunch.setType(lunchRequest.type());
+            newLunch.setOrder(order);
+            return newLunch;
+        }).collect(Collectors.toList());
+
+        order.setLunch(lunches);
+        return order;
+
+    }
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Lunch> lunch;
 
-    private enum Payment {
-        PIX(2L),
-        CASH(1L),
-        CREDIT_CARD(3L),
-        PIX_CASH(4L),
-        NO_PAYMENT(5L);
+    public enum Payment {
+        PIX(2L), CASH(1L), CREDIT_CARD(3L), PIX_CASH(4L), NO_PAYMENT(5L);
 
         private Long id;
 
@@ -117,6 +133,16 @@ public class Order {
         this.lunch = lunch;
     }
 
+    public void setLunchFromRequest(List<LunchRequest> lunchRequestList) {
+        List<Lunch> lunches = lunchRequestList.stream().map(request -> {
+            Lunch lunch = new Lunch();
+            lunch.setType(Lunch.Types.valueOf(request.type()));
+            lunch.setMenuItems(request.menuItemList());
+            return lunch;
+        }).toList();
+        this.lunch = lunches;
+    }
+
     public BigDecimal getTotal() {
         return total;
     }
@@ -131,5 +157,21 @@ public class Order {
 
     public void setTotalWithDiscount(BigDecimal totalWithDiscount) {
         this.totalWithDiscount = totalWithDiscount;
+    }
+
+    public Boolean getDelived() {
+        return delived;
+    }
+
+    public void setDelived(Boolean delived) {
+        this.delived = delived;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 }

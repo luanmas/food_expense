@@ -5,5 +5,6 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record OrderRequest(@NotBlank String customerName, @NotBlank String paymentMethod, String observation, @NotNull Boolean delivered, String address, List<LunchRequest> lunchRequestList) {
+public record OrderRequest(@NotBlank String customerName, @NotBlank String paymentMethod, String observation,
+                           @NotNull Boolean delivered, String address, List<LunchRequest> lunchRequestList) {
 }

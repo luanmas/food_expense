@@ -4,7 +4,9 @@ import lunch_automate.com.example.app.Dto.LunchRequest;
 import lunch_automate.com.example.app.Dto.LunchResponse;
 import lunch_automate.com.example.app.Entity.Lunch;
 import lunch_automate.com.example.app.Entity.MenuItem;
+import lunch_automate.com.example.app.Entity.Order;
 import lunch_automate.com.example.app.Repository.LunchRepository;
+import lunch_automate.com.example.app.Repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,27 +15,21 @@ import java.util.List;
 @Service
 public class LunchService {
     private LunchRepository lunchRepository;
+    private MenuItemService menuItemService;
 
-    public LunchService(LunchRepository lunchRepository) {
+    public LunchService(LunchRepository lunchRepository, MenuItemService menuItemService) {
         this.lunchRepository = lunchRepository;
+        this.menuItemService = menuItemService;
     }
 
-    public LunchResponse createLunch(LunchRequest lunchRequest) {
+    public Lunch createLunch(LunchRequest lunchRequest, Order order) {
         var lunch = new Lunch();
         lunch.setType(lunchRequest.type());
-        List<MenuItem> menuItems = lunchRequest.menuItemList().stream()
-                .map(menuItem -> {
-                    var item = new MenuItem();
-                    item.setMenu(menuItem.menuItem());
-                    item.setType(MenuItem.Type.valueOf(menuItem.type()));
-                    return item;
-                })
-                .toList();
+        lunch.setOrder(order);
+        var menuItems = menuItemService.findAllMenu(lunchRequest.menuItemList());
 
         lunch.setMenuItems(menuItems);
-        var lunchCreated = lunchRepository.save(lunch);
-
-        return new LunchResponse(lunchCreated.getId(), lunchCreated.getMenuItems(), lunchCreated.getType());
+        return lunchRepository.save(lunch);
     }
 
     public List<LunchResponse> findAllLunches() {

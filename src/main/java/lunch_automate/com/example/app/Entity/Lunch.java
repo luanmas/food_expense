@@ -1,8 +1,10 @@
 package lunch_automate.com.example.app.Entity;
 
 import jakarta.persistence.*;
+import lunch_automate.com.example.app.Dto.MenuItemRequest;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "tb_lunch")
@@ -54,8 +56,20 @@ public class Lunch {
         return menuItems;
     }
 
+
     public void setMenuItems(List<MenuItem> menuItems) {
         this.menuItems = menuItems;
+    }
+
+    public void setMenuItemsRequest(List<MenuItemRequest> menuItemsRequest) {
+        List<MenuItem> menuItems = menuItemsRequest.stream()
+                .map(menuItemRequest -> {
+                    MenuItem menuItem = new MenuItem();
+                    menuItem.setType(MenuItem.Type.valueOf(menuItemRequest.type()));
+                    menuItem.setMenu(menuItemRequest.menuItem());
+                    return menuItem;
+                }).collect(Collectors.toList());
+        setMenuItems(menuItems);
     }
 
     public String getType() {
@@ -64,5 +78,17 @@ public class Lunch {
 
     public void setType(String type) {
         this.type = this.type.valueOf(type);
+    }
+
+    public void setType(Types type) {
+        this.type = type;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 }
