@@ -46,13 +46,6 @@ public class OrderService {
     }
 
     public List<Order> findAllOrders() {
-        var orderList = orderRepository.findAll().stream()
-                .map(order -> {
-                    var orderResponse = order.toOrderResponse(order);
-                });
-
-        return orderList;
+        return orderRepository.findAll();
     }
-
-    public
 }
