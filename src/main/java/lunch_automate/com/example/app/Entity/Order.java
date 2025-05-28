@@ -2,6 +2,7 @@ package lunch_automate.com.example.app.Entity;
 
 import jakarta.persistence.*;
 import lunch_automate.com.example.app.Dto.LunchRequest;
+import lunch_automate.com.example.app.Dto.LunchResponse;
 import lunch_automate.com.example.app.Dto.OrderRequest;
 import lunch_automate.com.example.app.Dto.OrderResponse;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
     private Long id;
 
     private String customerName;
@@ -30,19 +32,20 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private Payment payment;
 
-    public OrderResponse toOrderResponse(OrderRequest orderRequest) {
-        var orderResponse = new OrderResponse(orderRequest.customerName(), orderRequest.paymentMethod(), orderRequest.observation(), orderRequest.delivered(), orderRequest.address(), orderRequest.lunchRequestList());
+//    public OrderResponse toOrderResponse(OrderRequest orderRequest) {
+//        var orderResponse = new OrderResponse(orderRequest.customerName(), orderRequest.paymentMethod(), orderRequest.observation(), orderRequest.delivered(), orderRequest.address(), orderRequest.lunchRequestList());
+//        return orderResponse;
+//    }
+
+    public OrderResponse toOrderResponse(Order order) {
+        List<LunchResponse> listLunchResponse = order.getLunch().stream()
+                .map(lunch -> {
+                    LunchResponse lunchResponse = new LunchResponse(lunch.getId(), lunch.getMenuItems(), lunch.getType());
+                    return lunchResponse;
+                }).collect(Collectors.toCollection(ArrayList::new));
+        OrderResponse orderResponse = new OrderResponse(order.getId(), order.getCustomerName(), order.getPayment().name(), order.getObservation(), order.getDelived(), order.getAddress(), listLunchResponse);
         return orderResponse;
     }
-
-//    public OrderResponse toOrderResponse(Order order) {
-//        var listLunchResponse = order.getLunch().stream().map(lunch -> {
-//            var lunchRequest = new LunchRequest();
-//
-//        })
-//
-//        var orderResponse = new OrderResponse(order.getCustomerName(), order.getPayment().name(), order.getObservation(), order.getDelived(), order.getAddress(), order.getLunch());
-//    }
 
     public Order toOrder(OrderRequest orderRequest) {
         var convertPaymentEnum = Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase());

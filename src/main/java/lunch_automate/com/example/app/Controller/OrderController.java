@@ -27,9 +27,19 @@ public class OrderController {
     }
 
     @GetMapping
-    public  ResponseEntity<List<Order>> getAllOrders() {
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
         var orderList = orderService.findAllOrders();
 
         return ResponseEntity.ok(orderList);
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Order> deleteOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.deleteOrder(orderId));
+    }
+
+    @PutMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> updateOrder(@PathVariable Long orderId, @RequestBody OrderRequest orderRequest) {
+        return ResponseEntity.ok(orderService.updateOrder(orderId, orderRequest));
     }
 }

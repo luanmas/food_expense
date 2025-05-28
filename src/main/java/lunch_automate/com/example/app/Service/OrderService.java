@@ -3,7 +3,7 @@ package lunch_automate.com.example.app.Service;
 import lunch_automate.com.example.app.Dto.OrderRequest;
 import lunch_automate.com.example.app.Dto.OrderResponse;
 import lunch_automate.com.example.app.Entity.Order;
-import lunch_automate.com.example.app.Repository.MenuItemRepository;
+import lunch_automate.com.example.app.Exceptions.NotFoundOrderException;
 import lunch_automate.com.example.app.Repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -41,11 +41,39 @@ public class OrderService {
         savedOrder.setLunch(lunchList);
 
         orderRepository.save(savedOrder);
-
-        return savedOrder.toOrderResponse(orderRequest);
+        return orderCreate.toOrderResponse(savedOrder);
     }
 
-    public List<Order> findAllOrders() {
-        return orderRepository.findAll();
+    public List<OrderResponse> findAllOrders() {
+        List<OrderResponse> listOrderResponse = orderRepository.findAll().stream()
+                .map(order -> {
+                    Order orderResponse = new Order();
+                    return orderResponse.toOrderResponse(order);
+                }).collect(Collectors.toCollection(ArrayList::new));
+
+        return listOrderResponse;
+    }
+
+    public Order deleteOrder(Long orderId) {
+        var orderToDelete = orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
+        orderRepository.delete(orderToDelete);
+
+        return orderToDelete;
+    }
+
+    public OrderResponse updateOrder(Long orderId, OrderRequest orderRequest) {
+        Order order = orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
+        order.setCustomerName(orderRequest.customerName());
+        order.setObservation(orderRequest.observation());
+        order.setAddress(orderRequest.address());
+        order.setPayment(Order.Payment.valueOf(orderRequest.paymentMethod().toUpperCase()));
+        order.setDelived(orderRequest.delivered());
+
+        var lunchList = lunchService.verifyMenuItemOnLunch(orderRequest.lunchRequestList(), order);
+        order.setLunch(lunchList);
+
+
+        var orderUpdated = orderRepository.save(order);
+        return order.toOrderResponse(orderUpdated);
     }
 }
