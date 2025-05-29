@@ -21,6 +21,12 @@ public class User implements UserDetails {
 
     private Role role;
 
+    public User(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
     public enum Role {
         USER(2L),
         ADMIN(1L);
